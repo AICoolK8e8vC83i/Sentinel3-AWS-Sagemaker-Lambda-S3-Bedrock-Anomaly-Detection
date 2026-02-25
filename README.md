@@ -2,7 +2,7 @@
 
 ## Abstract
 
-This project implements a production-ready Computer Vision and Vision-Language Model (VLM) pipeline designed for planetary-scale maritime monitoring. The architecture utilizes a "Triangular Logic Flow" to bridge the gap between raw pixel detection and high-level crisis reasoning. By leveraging RF-DETR for NMS-free object detection and a dual-model consensus mechanism (Qwen-3 235B and Claude 4.6 Sonnet), the system identifies navigational anomalies such as the Suez Canal blockages (e.g. "The Ever Given Ship, the Suez Canal, and the Operations Blunder, April 2024," DOI: 10.13140/RG.2.2.19396.23689). The backend is built on a serverless, zero-framework AWS architecture, ensuring infinite scalability and enterprise-grade security via SSE-KMS and granular IAM policies.
+This project implements a production-ready Computer Vision and Vision-Language Model (VLM) pipeline designed for planetary-scale maritime monitoring. The architecture utilizes a "Triangular Logic Flow" to bridge the gap between raw pixel detection and high-level crisis reasoning. By using RF-DETR for NMS-free object detection and a dual-model consensus mechanism (Qwen-3 235B and Claude 4.6 Sonnet), the system identifies navigational anomalies such as the Suez Canal blockages (e.g. "The Ever Given Ship, the Suez Canal, and the Operations Blunder, April 2024," DOI: 10.13140/RG.2.2.19396.23689). The backend is built on a serverless, zero-framework AWS architecture, ensuring infinite scalability and enterprise-grade security via SSE-KMS and granular IAM policies.
 
 ---
 
@@ -34,11 +34,11 @@ The pipeline follows a Triangular Logic Flow across three stages:
 **Stage 1 — Ingestion (AWS S3 + Lambda)**
 Sentinel-2 imagery tiles are ingested via S3 event triggers into a serverless Lambda function. No persistent compute is provisioned at rest. SSE-KMS encryption is applied at the S3 layer; IAM policies enforce least-privilege access between pipeline components. The choice of native Boto3 over abstraction frameworks such as CrewAI or LangGraph is intentional: framework overhead introduces non-deterministic failure modes and version-dependency brittleness that are unacceptable in a pipeline where each function invocation costs real money and latency. Direct Boto3 calls give full control over retry logic, timeout behavior, and cold-start mitigation.
 
-**Stage 2 — Detection (RF-DETR on SageMaker / Lambda Container)**
+**Stage 2 - Detection (RF-DETR on SageMaker / Lambda Container)**
 Preprocessed image tiles are passed to a containerized RF-DETR inference endpoint. The model outputs bounding boxes, class probabilities, and confidence scores without NMS post-processing. Detections are serialized and written to a DynamoDB results table, keyed by tile ID and timestamp, for downstream consumption.
 
-**Stage 3 — Reasoning (Qwen-3 235B → Claude 4.6 Sonnet)**
-Detection payloads are routed to Qwen-3 235B for initial scene contextualization — the model produces a structured description of detected objects, their spatial relationships, and any anomalous patterns relative to baseline traffic in that region. This output, together with the original image crop and bounding box overlay, is passed to Claude 4.6 Sonnet for anomaly classification and risk scoring. The Sonnet model acts as auditor: it either confirms, revises, or escalates the Qwen-3 assessment. Final classifications are written to a notification queue (SNS) for downstream alerting.
+**Stage 3 — Reasoning (Qwen-3 235B -> Claude 4.6 Sonnet)**
+Detection payloads are routed to Qwen-3 235B for initial scene contextualization - the model produces a structured description of detected objects, their spatial relationships, and any anomalous patterns relative to baseline traffic in that region. This output, together with the original image crop and bounding box overlay, is passed to Claude 4.6 Sonnet for anomaly classification and risk scoring. The Sonnet model acts as auditor: it either confirms, revises, or escalates the Qwen-3 assessment. Final classifications are written to a notification queue (SNS) for downstream alerting.
 
 The "Triangular Logic" naming reflects the three-node handoff: raw pixel data enters at vertex one (detection), semantic scene understanding is constructed at vertex two (Qwen-3), and the crisis-level reasoning decision is made at vertex three (Claude 4.6 Sonnet). The triangle closes when the classification result is reconciled against the original detection bounding boxes for traceability.
 
@@ -69,9 +69,9 @@ The immediate development priorities are: multi-temporal tile comparison for tra
 
 ## Citation
 
-If referencing the Ever Given case study framing: "The Ever Given Ship, the Suez Canal, and the Operations Blunder, April 2024." DOI: 10.13140/RG.2.2.19396.23689.
+"The Ever Given Ship, the Suez Canal, and the Operations Blunder, April 2024." DOI: 10.13140/RG.2.2.19396.23689.
 
-For the RF-DETR architectural motivation: Carion, N. et al. "End-to-End Object Detection with Transformers." ECCV 2020.
+Carion, N. et al. "End-to-End Object Detection with Transformers." ECCV 2020.
 
 ---
 
