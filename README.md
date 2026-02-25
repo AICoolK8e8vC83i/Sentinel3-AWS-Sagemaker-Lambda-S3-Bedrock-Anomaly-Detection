@@ -77,4 +77,4 @@ For the RF-DETR architectural motivation: Carion, N. et al. "End-to-End Object D
 
 ## License
 
-MIT
+Creative Commons (CC) (1.0) Universal licenses
